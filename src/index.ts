@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { themeFromSourceColor } from '@material/material-color-utilities';
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { unlink } from 'fs/promises';
 import multer from 'multer';
 import path from 'path';
@@ -33,47 +33,84 @@ async function main() {
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
 
-  app.get('/', async (req, res) => {
-    const theme = await themeFromImagePath(
-      path.join(__dirname, '..', 'temp', 'temp.jpg'),
-    );
+  /**
+   * Use for testing only
+   */
+  app.get('/', async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+      const theme = await themeFromImagePath(
+        path.join(__dirname, '..', 'temp', 'temp.jpg'),
+      );
 
-    res.json(theme);
-  });
-
-  app.post('/image', upload.single('image'), async (req, res) => {
-    const { file } = req;
-
-    if (!file) {
-      res.status(400).json({ message: 'field image is required' });
-      return;
+      res.json(theme);
+    } catch (error) {
+      next(error);
     }
-
-    const theme = await themeFromImagePath(file.path).finally(() =>
-      unlink(file.path),
-    );
-
-    res.json({
-      themeSource: theme.source,
-      themeStyle: convertSchemesToCss(theme.schemes),
-    });
   });
 
-  app.post('/source', async (req, res) => {
-    const { source } = req.body;
+  app.post(
+    '/image',
+    upload.single('image'),
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { file } = req;
 
-    if (typeof source !== 'number') {
-      res.status(400).json({ message: 'field source is required' });
-      return;
-    }
+        if (!file) {
+          res.status(400).json({ message: 'field image is required' });
+          return;
+        }
 
-    const theme = await themeFromSourceColor(Number(source));
+        const theme = await themeFromImagePath(file.path).finally(() =>
+          unlink(file.path),
+        );
 
-    res.json({
-      themeSource: theme.source,
-      themeStyle: convertSchemesToCss(theme.schemes),
-    });
+        res.json({
+          themeSource: theme.source,
+          themeStyle: convertSchemesToCss(theme.schemes),
+        });
+      } catch (error) {
+        next(error);
+      }
+    },
+  );
+
+  app.post(
+    '/source',
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { source } = req.body;
+
+        if (typeof source !== 'number') {
+          res.status(400).json({ message: 'field source is required' });
+          return;
+        }
+
+        if (source < 0 || source > 4294967295) {
+          res.status(400).json({ message: 'field source has invalid value' });
+          return;
+        }
+
+        const theme = await themeFromSourceColor(Number(source));
+
+        res.json({
+          themeSource: theme.source,
+          themeStyle: convertSchemesToCss(theme.schemes),
+        });
+      } catch (error) {
+        next(error);
+      }
+    },
+  );
+
+  app.use('*', (_req: Request, res: Response, _next: NextFunction) => {
+    res.status(404).json({ message: 'not found' });
   });
+
+  app.use(
+    (_err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+      res.status(500).json({ message: 'internal server error' });
+    },
+  );
 
   app.listen(PORT, () =>
     console.log(`Server listen on http://localhost:${PORT}`),

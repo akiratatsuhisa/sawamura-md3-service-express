@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "name": "md3-service",
+  "name": "sawamura-md3-service-express",
   "main": "node dist/index.js",
   "scripts": {
     "start": "node dist/index.js",

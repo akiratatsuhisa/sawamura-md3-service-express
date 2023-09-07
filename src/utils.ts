@@ -46,7 +46,7 @@ export function convertSchemesToCss(
   let css = '';
 
   for (const scheme in schemes) {
-    css += `${prefix}${scheme} {`;
+    css += `${prefix}${scheme}{`;
 
     const fields = schemes[scheme].toJSON();
 
@@ -59,7 +59,7 @@ export function convertSchemesToCss(
     for (const [key, value] of Object.entries(fields)) {
       const rgbValue = hexToRgb(value).join(',');
 
-      css += `${cssVar(key)}: ${rgbValue};`;
+      css += `${cssVar(key)}:${rgbValue};`;
     }
 
     // add surface container
@@ -72,7 +72,7 @@ export function convertSchemesToCss(
         ',',
       );
 
-      css += `${cssVar(key)}: ${rgbValue};`;
+      css += `${cssVar(key)}:${rgbValue};`;
     }
     css += '}';
   }

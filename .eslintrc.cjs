@@ -29,7 +29,7 @@ module.exports = {
         caughtErrorsIgnorePattern: '^_',
       },
     ],
-    '@typescript-eslint/no-duplicate-imports': 'error',
+    'import/no-duplicates': 'error',
     'simple-import-sort/imports': 'error',
     'simple-import-sort/exports': 'error',
   },

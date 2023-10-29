@@ -27,12 +27,6 @@ jobs:
         run: npm run test:lint
 
   build:
-    env:
-      VITE_WS_URL: ${{ secrets.VITE_WS_URL }}
-      VITE_API_URL: ${{ secrets.VITE_API_URL }}
-      VITE_NO_AVATAR_URL: ${{ secrets.VITE_NO_AVATAR_URL }}
-      VITE_NO_BACKGROUND_URL: ${{ secrets.VITE_NO_BACKGROUND_URL }}
-
     runs-on: ubuntu-latest
 
     steps:
